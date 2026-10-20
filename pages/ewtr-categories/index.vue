@@ -7,6 +7,7 @@
         <p class="text-sm text-gray-500">Kelola master data daftar kategori tools untuk checklist EWTR.</p>
       </div>
       <button 
+        v-if="can('ewtr-categories', 'tambah')"
         @click="showAddModal" 
         class="w-full sm:w-auto bg-brand-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-brand-dark/20 hover:bg-brand-light flex items-center justify-center gap-2 transition"
       >
@@ -77,6 +78,7 @@
               </td>
               <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                 <button 
+                  v-if="can('ewtr-categories', 'edit')"
                   @click="showEditModal(item)" 
                   class="inline-block p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors mx-1"
                   title="Edit Kategori"
@@ -86,6 +88,7 @@
                   </svg>
                 </button>
                 <button 
+                  v-if="can('ewtr-categories', 'delete')"
                   @click="deleteItem(item.id)" 
                   class="inline-block p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   title="Hapus Kategori"
@@ -188,6 +191,9 @@
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
 
+import { usePermissions } from '~/composables/usePermissions'
+
+const { can } = usePermissions()
 const swal = inject('swal')
 const items = ref([])
 const meta = ref(null)

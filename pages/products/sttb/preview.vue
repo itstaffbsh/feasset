@@ -45,7 +45,7 @@
       <div v-if="!pending && data" class="relative transition-all print:w-auto print:h-auto" :style="{ width: `calc(210mm * ${zoomLevel})`, height: `calc(297mm * ${zoomLevel})`, marginBottom: '2rem' }">
         <!-- Area Kertas A4 -->
         <div class="bg-white shadow-lg print:shadow-none absolute top-0 left-0 A4-container flex flex-col transition-transform origin-top-left" 
-             :style="{ width: '210mm', height: '297mm', boxSizing: 'border-box', overflow: 'hidden', transform: `scale(${zoomLevel})` }">
+             :style="{ width: '210mm', height: '297mm', boxSizing: 'border-box', overflow: 'hidden', transform: `scale(${zoomLevel})`, fontFamily: `'Times New Roman', Times, serif` }">
       
       <!-- Header / Kop Surat (Full width) -->
       <div class="w-full" style="padding-top: 2rem;">
@@ -53,14 +53,14 @@
       </div>
 
       <!-- Konten Surat (Dengan Padding) -->
-      <div class="flex-grow" style="padding: 0.2cm 2cm 0 2cm;">
+      <div class="flex-grow" style="padding: 0.2cm 2cm 0 2cm; font-family: 'Times New Roman', Times, serif;">
         <!-- Judul -->
         <div class="text-center mb-4 mt-2">
           <h1 class="text-lg font-bold underline">SURAT TANDA TERIMA BARANG</h1>
         </div>
 
         <!-- Isi Surat -->
-        <div class="text-sm leading-normal space-y-1.5 font-serif" style="font-size: 11pt; line-height: 1.4;">
+        <div class="text-sm leading-normal space-y-1.5" style="font-size: 11pt; line-height: 1.4; font-family: 'Times New Roman', Times, serif;">
           <p class="text-justify">
             Pada hari ini {{ formattedDate }} bertempat di PT Samasta Properti Manajemen Internasional kami yang bertanda tangan dibawah ini :
           </p>
@@ -321,8 +321,9 @@ const printPdf = async () => {
 </script>
 
 <style>
-.A4-container {
-  font-family: 'Times New Roman', Times, serif;
+.A4-container,
+.A4-container * {
+  font-family: 'Times New Roman', Times, serif !important;
 }
 @media print {
   body * {
@@ -339,7 +340,8 @@ const printPdf = async () => {
     padding: 0 !important;
     box-shadow: none !important;
     width: 210mm !important;
-    height: 297mm !important; overflow: hidden !important;
+    height: 297mm !important;
+    overflow: hidden !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

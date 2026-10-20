@@ -5,7 +5,7 @@
         <h1 class="text-2xl font-bold text-gray-900">Manajemen Departemen</h1>
         <p class="text-sm text-gray-500">Kelola master data daftar departemen.</p>
       </div>
-      <button @click="showAddModal" class="w-full sm:w-auto bg-brand-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-brand-dark/20 hover:bg-brand-light flex items-center justify-center gap-2">
+      <button v-if="can('departments', 'tambah')" @click="showAddModal" class="w-full sm:w-auto bg-brand-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-brand-dark/20 hover:bg-brand-light flex items-center justify-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Tambah Departemen
       </button>
@@ -68,10 +68,10 @@
                 <td class="hidden md:table-cell px-6 py-4 text-sm font-medium text-brand-dark">{{ item.kode_asset }}</td>
                 <td class="hidden md:table-cell px-6 py-4 text-sm font-bold text-gray-900">{{ item.nama_departemen }}</td>
                 <td class="hidden md:table-cell px-6 py-4 text-right text-sm font-medium">
-                  <button @click="showEditModal(item)" class="inline-block p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors mx-1">
+                  <button v-if="can('departments', 'edit')" @click="showEditModal(item)" class="inline-block p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors mx-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                   </button>
-                  <button @click="deleteItem(item.id)" class="inline-block p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <button v-if="can('departments', 'delete')" @click="deleteItem(item.id)" class="inline-block p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                   </button>
                 </td>
@@ -89,8 +89,8 @@
                       <div class="text-sm font-bold text-gray-900">{{ item.nama_departemen }}</div>
                     </div>
                     <div class="pt-3 flex gap-2 border-t border-gray-200">
-                      <button @click="showEditModal(item)" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-blue-600 shadow-sm">Edit</button>
-                      <button @click="deleteItem(item.id)" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-red-600 shadow-sm">Hapus</button>
+                      <button v-if="can('departments', 'edit')" @click="showEditModal(item)" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-blue-600 shadow-sm">Edit</button>
+                      <button v-if="can('departments', 'delete')" @click="deleteItem(item.id)" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-red-600 shadow-sm">Hapus</button>
                     </div>
                   </div>
                 </td>
@@ -140,6 +140,9 @@
 
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
+import { usePermissions } from '~/composables/usePermissions'
+
+const { can } = usePermissions()
 const { $swal: swal } = useNuxtApp()
 
 const items = ref([])

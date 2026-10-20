@@ -10,6 +10,7 @@
 
         <!-- Tambah Karyawan (Tetap di sebelah kanan) -->
         <NuxtLink 
+          v-if="can('users', 'tambah')"
           to="/users/create" 
           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand-light text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm transition whitespace-nowrap self-start sm:self-center"
         >
@@ -19,9 +20,10 @@
       </div>
 
       <!-- Action Buttons (Export PDF, Excel, Import) di sebelah kiri di bawah deskripsi judul -->
-      <div class="flex flex-wrap items-center gap-2 mt-4">
+      <div v-if="can('users', 'export') || can('users', 'import')" class="flex flex-wrap items-center gap-2 mt-4">
         <!-- Export PDF -->
         <button 
+          v-if="can('users', 'export')"
           @click="exportPdf" 
           :disabled="isExportingPdf"
           class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition disabled:opacity-50"
@@ -34,6 +36,7 @@
 
         <!-- Export Excel -->
         <button 
+          v-if="can('users', 'export')"
           @click="exportExcel" 
           :disabled="isExportingExcel"
           class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition disabled:opacity-50"
@@ -46,6 +49,7 @@
 
         <!-- Import Excel -->
         <button 
+          v-if="can('users', 'import')"
           @click="openImportModal" 
           class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition"
           title="Impor data karyawan dari Excel / CSV"
@@ -173,16 +177,26 @@
                 <!-- Aksi -->
                 <td class="px-5 py-3.5 text-right whitespace-nowrap">
                   <div class="inline-flex items-center gap-1">
-                    <button v-if="item.role !== 'admin' && item.role !== 'super_admin'" @click="makeAdmin(item.id, item.name)" title="Jadikan Admin" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                    <button 
+                      v-if="can('users', 'make_admin') && item.role !== 'admin' && item.role !== 'super_admin'" 
+                      @click="makeAdmin(item.id, item.name)" 
+                      title="Jadikan Admin" 
+                      class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </button>
-                    <button @click="resetPassword(item.id)" title="Reset Password" class="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                    <button 
+                      v-if="can('users', 'reset_password')" 
+                      @click="resetPassword(item.id)" 
+                      title="Reset Password" 
+                      class="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                    >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
                     </button>
-                    <NuxtLink :to="`/users/${item.id}/edit`" title="Edit Karyawan" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <NuxtLink v-if="can('users', 'edit')" :to="`/users/${item.id}/edit`" title="Edit Karyawan" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     </NuxtLink>
-                    <button @click="deleteItem(item.id)" title="Hapus Karyawan" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button v-if="can('users', 'delete')" @click="deleteItem(item.id)" title="Hapus Karyawan" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                   </div>
@@ -251,10 +265,10 @@
                     </div>
 
                     <div class="pt-2 flex flex-wrap gap-2 border-t border-gray-200">
-                      <button v-if="item.role !== 'admin' && item.role !== 'super_admin'" @click="makeAdmin(item.id, item.name)" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-green-600 font-semibold shadow-sm text-center">Jadikan Admin</button>
-                      <button @click="resetPassword(item.id)" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-purple-600 font-semibold shadow-sm text-center">Reset Pwd</button>
-                      <NuxtLink :to="`/users/${item.id}/edit`" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-blue-600 font-semibold shadow-sm text-center">Edit</NuxtLink>
-                      <button @click="deleteItem(item.id)" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-red-600 font-semibold shadow-sm text-center">Hapus</button>
+                      <button v-if="can('users', 'make_admin') && item.role !== 'admin' && item.role !== 'super_admin'" @click="makeAdmin(item.id, item.name)" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-green-600 font-semibold shadow-sm text-center">Jadikan Admin</button>
+                      <button v-if="can('users', 'reset_password')" @click="resetPassword(item.id)" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-purple-600 font-semibold shadow-sm text-center">Reset Pwd</button>
+                      <NuxtLink v-if="can('users', 'edit')" :to="`/users/${item.id}/edit`" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-blue-600 font-semibold shadow-sm text-center">Edit</NuxtLink>
+                      <button v-if="can('users', 'delete')" @click="deleteItem(item.id)" class="flex-1 py-1.5 bg-white border border-gray-200 rounded text-red-600 font-semibold shadow-sm text-center">Hapus</button>
                     </div>
                   </div>
                 </td>
@@ -435,7 +449,9 @@
 
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
+import { usePermissions } from '~/composables/usePermissions'
 
+const { can } = usePermissions()
 const swal = inject('swal')
 const config = useRuntimeConfig()
 
@@ -762,6 +778,11 @@ const executeImportWithAction = async (action) => {
 }
 
 const resetPassword = async (id) => {
+  if (!can('users', 'reset_password')) {
+    swal.fire('Akses Ditolak', 'Anda tidak memiliki hak akses untuk mereset password.', 'warning')
+    return
+  }
+
   const { value: formValues } = await swal.fire({
     title: 'Reset Password',
     html: `
@@ -805,6 +826,11 @@ const resetPassword = async (id) => {
 }
 
 const makeAdmin = async (id, name) => {
+  if (!can('users', 'make_admin')) {
+    swal.fire('Akses Ditolak', 'Anda tidak memiliki hak akses untuk mengubah role menjadi Admin.', 'warning')
+    return
+  }
+
   const result = await swal.fire({
     title: 'Jadikan Admin?',
     text: `Apakah Anda yakin ingin menjadikan ${name} sebagai Admin?`,

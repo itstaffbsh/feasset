@@ -7,6 +7,7 @@
         <p class="text-xs sm:text-sm text-gray-500">Kelola dan pantau progres checklist Electronic Work / Tool Request.</p>
       </div>
       <button 
+        v-if="can('ewtr', 'tambah')"
         @click="showAddModal" 
         class="w-full sm:w-auto bg-brand-dark text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-brand-dark/20 hover:bg-brand-light flex items-center justify-center gap-2 transition"
       >
@@ -189,7 +190,7 @@
 
                   <!-- Edit (Only for belum_sukses) -->
                   <button 
-                    v-if="item.status !== 'sukses'"
+                    v-if="item.status !== 'sukses' && can('ewtr', 'edit')"
                     @click="showEditModal(item)" 
                     class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     title="Edit EWTR"
@@ -201,7 +202,7 @@
 
                   <!-- Delete (Only for belum_sukses) -->
                   <button 
-                    v-if="item.status !== 'sukses'"
+                    v-if="item.status !== 'sukses' && can('ewtr', 'delete')"
                     @click="deleteEwtr(item.id)" 
                     class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     title="Hapus EWTR"
@@ -315,6 +316,7 @@
                 <!-- Edit & Delete (Only for belum_sukses) -->
                 <template v-if="item.status !== 'sukses'">
                   <button 
+                    v-if="can('ewtr', 'edit')"
                     @click="showEditModal(item)" 
                     class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 border border-gray-200 rounded-lg transition-colors flex items-center gap-1 text-xs"
                     title="Edit EWTR"
@@ -326,6 +328,7 @@
                   </button>
 
                   <button 
+                    v-if="can('ewtr', 'delete')"
                     @click="deleteEwtr(item.id)" 
                     class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 border border-gray-200 rounded-lg transition-colors flex items-center gap-1 text-xs"
                     title="Hapus EWTR"
@@ -543,6 +546,9 @@
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
 
+import { usePermissions } from '~/composables/usePermissions'
+
+const { can } = usePermissions()
 const config = useRuntimeConfig()
 const swal = inject('swal')
 

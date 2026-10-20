@@ -10,6 +10,7 @@
 
         <!-- Tambah Aset (Tetap di sebelah kanan) -->
         <NuxtLink 
+          v-if="can('products', 'tambah')"
           to="/products/create" 
           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand-light text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm transition whitespace-nowrap self-start sm:self-center"
         >
@@ -19,9 +20,10 @@
       </div>
 
       <!-- Action Buttons (Export PDF, Excel, Import) di sebelah kiri di bawah deskripsi judul -->
-      <div class="flex flex-wrap items-center gap-2 mt-4">
+      <div v-if="can('products', 'export') || can('products', 'import')" class="flex flex-wrap items-center gap-2 mt-4">
         <!-- Export PDF -->
         <button 
+          v-if="can('products', 'export')"
           @click="exportPdf" 
           :disabled="isExportingPdf"
           class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition disabled:opacity-50"
@@ -34,6 +36,7 @@
 
         <!-- Export Excel -->
         <button 
+          v-if="can('products', 'export')"
           @click="exportExcel" 
           :disabled="isExportingExcel"
           class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition disabled:opacity-50"
@@ -46,6 +49,7 @@
 
         <!-- Import Excel -->
         <button 
+          v-if="can('products', 'import')"
           @click="openImportModal" 
           class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition"
           title="Impor data inventaris dari Excel / CSV"
@@ -185,10 +189,10 @@
                     <NuxtLink :to="`/products/${product.id}`" class="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-100 rounded-lg transition-colors" title="Lihat Detail & Spesifikasi">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     </NuxtLink>
-                    <NuxtLink :to="`/products/${product.id}/edit`" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Aset">
+                    <NuxtLink v-if="can('products', 'edit')" :to="`/products/${product.id}/edit`" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Aset">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     </NuxtLink>
-                    <button @click="deleteProduct(product.id)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Aset">
+                    <button v-if="can('products', 'delete')" @click="deleteProduct(product.id)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Aset">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                   </div>
@@ -232,8 +236,8 @@
 
                     <div class="pt-2 flex gap-2 border-t border-gray-200">
                       <NuxtLink :to="`/products/${product.id}`" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg font-bold text-gray-700 shadow-sm">Detail</NuxtLink>
-                      <NuxtLink :to="`/products/${product.id}/edit`" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg font-bold text-blue-600 shadow-sm">Edit</NuxtLink>
-                      <button @click="deleteProduct(product.id)" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg font-bold text-red-600 shadow-sm">Hapus</button>
+                      <NuxtLink v-if="can('products', 'edit')" :to="`/products/${product.id}/edit`" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg font-bold text-blue-600 shadow-sm">Edit</NuxtLink>
+                      <button v-if="can('products', 'delete')" @click="deleteProduct(product.id)" class="flex-1 text-center py-2 bg-white border border-gray-200 rounded-lg font-bold text-red-600 shadow-sm">Hapus</button>
                     </div>
                   </div>
                 </td>
@@ -567,7 +571,9 @@
 
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
+import { usePermissions } from '~/composables/usePermissions'
 
+const { can } = usePermissions()
 const { $swal: swal } = useNuxtApp()
 const searchQuery = ref('')
 const products = ref({ data: [] })

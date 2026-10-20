@@ -34,7 +34,7 @@
     </div>
 
     <!-- Area Kertas A4 -->
-    <div v-if="!pending && data" class="bg-white shadow-lg mx-auto print:shadow-none print:mx-0 A4-container flex flex-col" style="width: 210mm; height: 297mm; box-sizing: border-box; overflow: hidden; margin-bottom: 2rem;">
+    <div v-if="!pending && data" class="bg-white shadow-lg mx-auto print:shadow-none print:mx-0 A4-container flex flex-col" style="width: 210mm; height: 297mm; box-sizing: border-box; overflow: hidden; margin-bottom: 2rem; font-family: 'Times New Roman', Times, serif;">
       
       <!-- Header / Kop Surat (Full width) -->
       <div class="w-full" style="padding-top: 2rem;">
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Isi Surat -->
-        <div class="text-sm leading-normal space-y-1.5 font-serif" style="font-size: 11pt; line-height: 1.4;">
+        <div class="text-sm leading-normal space-y-1.5 " style="font-size: 11pt; line-height: 1.4;">
           <p class="text-justify">
             Pada hari ini {{ formattedDate }} bertempat di PT Samasta Properti Manajemen Internasional kami yang bertanda tangan dibawah ini :
           </p>
@@ -163,7 +163,16 @@
     </div>
 
     <div v-else-if="pending" class="text-center py-20">
-      <p class="text-gray-500">Memuat dokumen STTB...</p>
+      <div class="inline-block w-8 h-8 border-4 border-brand-dark border-t-transparent rounded-full animate-spin mb-3"></div>
+      <p class="text-gray-500 font-medium">Memuat dokumen STTB...</p>
+    </div>
+
+    <div v-else-if="!data" class="max-w-4xl mx-auto bg-white p-12 rounded-xl border border-gray-200 text-center text-gray-500 space-y-3 shadow-sm">
+      <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+      </div>
+      <p class="text-base font-bold text-gray-800">Dokumen STTB Tidak Ditemukan</p>
+      <p class="text-xs text-gray-500 max-w-md mx-auto">Data STTB tidak ditemukan atau akun Anda belum memiliki izin hak akses untuk melihat data transaksi ini.</p>
     </div>
     
   </div>
@@ -249,8 +258,9 @@ const printPdf = () => {
 </script>
 
 <style>
-.A4-container {
-  font-family: 'Times New Roman', Times, serif;
+.A4-container,
+.A4-container * {
+  font-family: 'Times New Roman', Times, serif !important;
 }
 @media print {
   body * {
@@ -267,7 +277,8 @@ const printPdf = () => {
     padding: 0 !important;
     box-shadow: none !important;
     width: 210mm !important;
-    height: 297mm !important; overflow: hidden !important;
+    height: 297mm !important;
+    overflow: hidden !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

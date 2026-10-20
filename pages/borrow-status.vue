@@ -136,9 +136,9 @@
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                           File PDF
                         </a>
-                        <button @click="openModal(history)" class="text-[10px] text-gray-500 hover:text-brand-dark font-medium underline">Ganti File</button>
+                        <button v-if="can('borrow-status', 'edit')" @click="openModal(history)" class="text-[10px] text-gray-500 hover:text-brand-dark font-medium underline">Ganti File</button>
                       </div>
-                      <button v-else @click="openModal(history)" class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-dark text-white hover:bg-brand-light rounded-md text-xs font-bold shadow-sm transition-colors whitespace-nowrap">
+                      <button v-else-if="can('borrow-status', 'tambah')" @click="openModal(history)" class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-dark text-white hover:bg-brand-light rounded-md text-xs font-bold shadow-sm transition-colors whitespace-nowrap">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                         Tambah Scan
                       </button>
@@ -231,6 +231,9 @@
 import { ref, watch, onMounted } from 'vue'
 import { useRuntimeConfig } from '#imports'
 
+import { usePermissions } from '~/composables/usePermissions'
+
+const { can } = usePermissions()
 const { $swal: swal } = useNuxtApp()
 const config = useRuntimeConfig()
 

@@ -94,9 +94,12 @@
           </div>
         </div>
 
-        <button type="submit" class="w-full bg-brand-dark text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:bg-brand-light transition-colors" :disabled="loading">
+        <button v-if="can('transfer', 'tambah')" type="submit" class="w-full bg-brand-dark text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:bg-brand-light transition-colors" :disabled="loading">
           {{ loading ? 'Menyimpan...' : 'Proses Transaksi' }}
         </button>
+        <div v-else class="p-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-lg text-center">
+          Role Anda tidak memiliki hak akses untuk memproses transaksi baru.
+        </div>
       </form>
     </div>
   </div>
@@ -105,7 +108,9 @@
 <script setup>
 import { ref, onMounted, inject, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { usePermissions } from '~/composables/usePermissions'
 
+const { can } = usePermissions()
 const router = useRouter()
 const swal = inject('swal')
 const products = ref([])

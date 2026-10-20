@@ -96,14 +96,22 @@
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Role Aplikasi <span class="text-red-500">*</span></label>
           <select v-model="form.role" required class="w-full border border-gray-200 rounded-lg px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-dark outline-none bg-white">
-            <option value="user">User / Karyawan Biasa</option>
-            <option value="admin">Admin</option>
+            <template v-if="availableRoles.length > 0">
+              <option v-for="r in availableRoles" :key="r.id" :value="r.name">
+                {{ r.display_name || r.name }}
+              </option>
+            </template>
+            <template v-else>
+              <option value="user">User / Karyawan Biasa</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </template>
           </select>
         </div>
 
-        <!-- Password (jika admin) -->
-        <div v-if="form.role === 'admin'" class="md:col-span-2">
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Password Admin <span class="text-red-500">*</span></label>
+        <!-- Password (jika admin atau non-user) -->
+        <div v-if="form.role !== 'user'" class="md:col-span-2">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Password Akun (Minimal 8 karakter) <span class="text-red-500">*</span></label>
           <input v-model="form.password" type="password" required placeholder="Minimal 8 karakter" class="w-full border border-gray-200 rounded-lg px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-dark outline-none">
         </div>
 
@@ -137,6 +145,7 @@ const loading = ref(false)
 const pageLoading = ref(true)
 const offices = ref([])
 const departments = ref([])
+const availableRoles = ref([])
 
 const form = ref({
   name: '',
@@ -158,12 +167,14 @@ const form = ref({
 onMounted(async () => {
   pageLoading.value = true
   try {
-    const [offRes, deptRes] = await Promise.all([
+    const [offRes, deptRes, roleRes] = await Promise.all([
       $api('/offices'),
-      $api('/departments')
+      $api('/departments'),
+      $api('/roles').catch(() => null)
     ])
     if (offRes) offices.value = (offRes.data || offRes)
     if (deptRes) departments.value = (deptRes.data || deptRes)
+    if (roleRes?.roles) availableRoles.value = roleRes.roles
     if (offices.value.length > 0 && !form.value.office_id) {
       form.value.office_id = offices.value[0].id
     }

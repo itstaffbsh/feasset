@@ -93,9 +93,16 @@
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Role Aplikasi <span class="text-red-500">*</span></label>
           <select v-model="form.role" required class="w-full border border-gray-200 rounded-lg px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-dark outline-none bg-white">
-            <option value="user">User / Karyawan Biasa</option>
-            <option value="admin">Admin</option>
-            <option value="super_admin">Super Admin</option>
+            <template v-if="availableRoles.length > 0">
+              <option v-for="r in availableRoles" :key="r.id" :value="r.name">
+                {{ r.display_name || r.name }}
+              </option>
+            </template>
+            <template v-else>
+              <option value="user">User / Karyawan Biasa</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </template>
           </select>
         </div>
 
@@ -137,6 +144,7 @@ const loading = ref(false)
 const pending = ref(true)
 const offices = ref([])
 const departments = ref([])
+const availableRoles = ref([])
 
 const form = ref({
   name: '',
@@ -157,14 +165,16 @@ const form = ref({
 
 onMounted(async () => {
   try {
-    const [offRes, deptRes, userRes] = await Promise.all([
+    const [offRes, deptRes, userRes, roleRes] = await Promise.all([
       $api('/offices'),
       $api('/departments'),
-      $api(`/users/${route.params.id}/details`)
+      $api(`/users/${route.params.id}/details`),
+      $api('/roles').catch(() => null)
     ])
     
     if (offRes) offices.value = (offRes.data || offRes)
     if (deptRes) departments.value = (deptRes.data || deptRes)
+    if (roleRes?.roles) availableRoles.value = roleRes.roles
     
     if (userRes) {
       const u = userRes.user || userRes
