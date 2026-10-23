@@ -684,10 +684,16 @@ const getPdfUrl = (item) => {
   if (!item) return '#'
   const backendBase = config.public.apiBase.replace(/\/api\/?$/, '')
   if (item.pdf_path) {
-    const cleanPath = item.pdf_path.replace(/^\/?storage\/?/, '')
+    const cleanPath = item.pdf_path.replace(/^\/?(public\/|storage\/)/, '')
     return `${backendBase}/storage/${cleanPath}`
   }
-  return item.pdf_url || '#'
+  if (item.pdf_url) {
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && item.pdf_url.startsWith('http://')) {
+      return item.pdf_url.replace(/^http:\/\//, 'https://')
+    }
+    return item.pdf_url
+  }
+  return '#'
 }
 
 // Modal Handlers

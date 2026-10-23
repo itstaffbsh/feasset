@@ -33,7 +33,7 @@
       <!-- Action: Open & Download full PDF -->
       <div v-if="pdfUrl" class="w-full sm:w-auto flex items-center gap-2">
         <a 
-          :href="pdfUrl" 
+          :href="pdfBlobUrl || pdfUrl" 
           target="_blank" 
           rel="noopener noreferrer"
           class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-white border border-gray-200 hover:border-brand-dark text-gray-700 hover:text-brand-dark text-xs font-bold rounded-xl shadow-sm transition"
@@ -43,16 +43,15 @@
           </svg>
           <span>Buka di Tab Baru</span>
         </a>
-        <a 
-          :href="downloadUrl" 
-          download 
-          target="_blank"
-          class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 bg-brand-dark text-white hover:bg-brand-light text-xs font-bold rounded-xl shadow-sm transition"
+        <button 
+          @click="downloadPdf" 
+          type="button"
+          class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 bg-brand-dark text-white hover:bg-brand-light text-xs font-bold rounded-xl shadow-sm transition active:scale-95 cursor-pointer"
           title="Download file PDF"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
           <span class="hidden sm:inline">Download</span>
-        </a>
+        </button>
       </div>
     </div>
 
@@ -144,26 +143,47 @@
         
         <!-- Embedded Preview Container -->
         <div class="p-2 sm:p-4 bg-gray-100 flex flex-col items-center">
-          <div class="w-full max-w-5xl bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+          <div class="w-full max-w-5xl bg-white rounded-xl shadow border border-gray-200 overflow-hidden min-h-[450px] sm:min-h-[650px] flex flex-col justify-center">
+            <!-- Loading indicator -->
+            <div v-if="pdfLoading" class="p-16 flex flex-col items-center justify-center gap-3">
+              <div class="w-10 h-10 border-4 border-brand-dark/20 border-t-brand-dark rounded-full animate-spin"></div>
+              <p class="text-sm font-semibold text-gray-600">Memuat preview file PDF...</p>
+            </div>
+
+            <!-- Fallback if error loading or no pdf -->
+            <div v-else-if="pdfError || !pdfUrl" class="p-10 text-center flex flex-col items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              </div>
+              <h4 class="text-sm font-bold text-gray-800">Preview PDF Langsung Terbatas</h4>
+              <p class="text-xs text-gray-500 mt-1 max-w-md">Dokumen PDF tetap aman tersimpan di server. Anda dapat langsung membuka file di tab baru atau mengunduhnya.</p>
+              <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <a v-if="pdfUrl" :href="pdfUrl" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-brand-dark text-white rounded-xl text-xs font-bold shadow hover:bg-brand-light transition">
+                  Buka File di Tab Baru
+                </a>
+                <button v-if="pdfUrl" @click="downloadPdf" type="button" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-xs font-bold shadow-sm hover:bg-gray-50 transition cursor-pointer">
+                  Download File PDF
+                </button>
+              </div>
+            </div>
+
+            <!-- Iframe with Blob URL (bypasses cross-origin SAMEORIGIN restrictions) -->
             <iframe 
-              v-if="pdfUrl" 
-              :src="pdfUrl" 
+              v-else-if="pdfBlobUrl" 
+              :src="pdfBlobUrl" 
               class="w-full h-[450px] sm:h-[650px] border-0"
               title="Preview Dokumen EWTR"
             >
               <div class="p-8 text-center text-sm text-gray-500">
                 Browser Anda tidak mendukung preview PDF langsung. 
-                <a :href="pdfUrl" target="_blank" class="text-blue-600 underline font-bold ml-1">Klik di sini untuk mengunduh file PDF</a>.
+                <button @click="downloadPdf" type="button" class="text-blue-600 underline font-bold ml-1">Klik di sini untuk mengunduh file PDF</button>.
               </div>
             </iframe>
-            <div v-else class="p-12 text-center text-gray-400 text-sm">
-              File PDF tidak ditemukan atau belum diunggah.
-            </div>
           </div>
           <div v-if="pdfUrl" class="mt-2 text-xs text-gray-500 text-center">
-            Jika preview PDF tidak muncul otomatis di browser, silakan 
-            <a :href="pdfUrl" target="_blank" rel="noopener noreferrer" class="text-brand-dark underline font-bold">klik di sini untuk membuka PDF</a> atau 
-            <a :href="downloadUrl" download target="_blank" class="text-brand-dark underline font-bold">unduh langsung</a>.
+            Jika preview PDF tidak tampil di browser, silakan 
+            <a :href="pdfBlobUrl || pdfUrl" target="_blank" rel="noopener noreferrer" class="text-brand-dark underline font-bold">klik di sini untuk membuka di tab baru</a> atau 
+            <button @click="downloadPdf" type="button" class="text-brand-dark underline font-bold cursor-pointer">unduh langsung</button>.
           </div>
         </div>
       </div>
@@ -265,7 +285,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount, inject } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -274,6 +294,9 @@ const swal = inject('swal')
 
 const ewtr = ref(null)
 const pending = ref(true)
+const pdfBlobUrl = ref(null)
+const pdfLoading = ref(false)
+const pdfError = ref(false)
 
 const ewtrId = route.params.id
 
@@ -303,6 +326,72 @@ const downloadUrl = computed(() => {
   if (!pdfUrl.value) return '#'
   return pdfUrl.value.includes('?') ? `${pdfUrl.value}&download=1` : `${pdfUrl.value}?download=1`
 })
+
+const loadPdfBlob = async (url) => {
+  if (!url) {
+    pdfBlobUrl.value = null
+    return
+  }
+  pdfLoading.value = true
+  pdfError.value = false
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const blob = await res.blob()
+    if (pdfBlobUrl.value) {
+      URL.revokeObjectURL(pdfBlobUrl.value)
+    }
+    pdfBlobUrl.value = URL.createObjectURL(blob)
+  } catch (err) {
+    console.error('Failed loading PDF blob for preview:', err)
+    pdfError.value = true
+  } finally {
+    pdfLoading.value = false
+  }
+}
+
+watch(pdfUrl, (newUrl) => {
+  if (newUrl) {
+    loadPdfBlob(newUrl)
+  }
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  if (pdfBlobUrl.value) {
+    URL.revokeObjectURL(pdfBlobUrl.value)
+  }
+})
+
+const downloadPdf = async () => {
+  const filename = ewtr.value?.pdf_name || `EWTR_${ewtr.value?.nomor_ewtr || 'document'}.pdf`
+  if (pdfBlobUrl.value) {
+    const a = document.createElement('a')
+    a.href = pdfBlobUrl.value
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    return
+  }
+
+  if (pdfUrl.value) {
+    try {
+      const res = await fetch(pdfUrl.value)
+      if (!res.ok) throw new Error('HTTP ' + res.status)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      window.open(downloadUrl.value, '_blank')
+    }
+  }
+}
 
 const totalCount = computed(() => {
   return ewtr.value?.items?.length || 0

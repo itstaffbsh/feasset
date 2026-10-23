@@ -137,9 +137,9 @@
                             <svg class="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
                             <span>Lihat PDF</span>
                           </a>
-                          <a :href="getDownloadUrl(history.scanned_pdf)" download target="_blank" class="p-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-brand-dark rounded-md text-xs transition-colors shadow-sm" title="Download PDF langsung">
+                          <button @click="downloadPdf(history.scanned_pdf)" type="button" class="p-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-brand-dark rounded-md text-xs transition-colors shadow-sm cursor-pointer" title="Download PDF langsung">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                          </a>
+                          </button>
                         </div>
                         <button v-if="can('borrow-status', 'edit')" @click="openModal(history)" class="text-[10px] text-gray-500 hover:text-brand-dark font-medium underline">Ganti File</button>
                       </div>
@@ -311,11 +311,16 @@ const formatDate = (dateString) => {
 
 const getFileUrl = (path) => {
   if (!path) return '#'
+  const base = config.public.apiBase.replace(/\/api\/?$/, '')
+  
   if (path.startsWith('http://') || path.startsWith('https://')) {
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && path.startsWith('http://')) {
+      return path.replace(/^http:\/\//, 'https://')
+    }
     return path
   }
-  const base = config.public.apiBase.replace(/\/api\/?$/, '')
-  const cleanPath = path.replace(/^\/?storage\/?/, '')
+
+  const cleanPath = path.replace(/^\/?(public\/|storage\/)/, '')
   return `${base}/storage/${cleanPath}`
 }
 
@@ -323,6 +328,26 @@ const getDownloadUrl = (path) => {
   const url = getFileUrl(path)
   if (url === '#') return '#'
   return url.includes('?') ? `${url}&download=1` : `${url}?download=1`
+}
+
+const downloadPdf = async (path, defaultName = 'dokumen_scan.pdf') => {
+  const url = getFileUrl(path)
+  if (!url || url === '#') return
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('HTTP ' + res.status)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = path.split('/').pop() || defaultName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
+  } catch (e) {
+    window.open(getDownloadUrl(path), '_blank')
+  }
 }
 
 // Modal Actions
