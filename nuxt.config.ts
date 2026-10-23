@@ -37,8 +37,10 @@ export default defineNuxtConfig({
       display: 'standalone',
       orientation: 'portrait',
       scope: '/',
-      start_url: '/',
-      id: '/',
+      start_url: '/?source=pwa',
+      id: '/?source=pwa',
+      prefer_related_applications: false,
+      categories: ['business', 'productivity'],
       icons: [
         {
           src: '/icon-192x192.png',
@@ -67,7 +69,8 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      navigateFallback: '/'
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
     },
     client: {
       installPrompt: true

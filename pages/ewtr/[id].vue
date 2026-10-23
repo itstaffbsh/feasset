@@ -30,18 +30,30 @@
         </div>
       </div>
 
-      <!-- Action: Open full PDF -->
-      <a 
-        v-if="pdfUrl" 
-        :href="pdfUrl" 
-        target="_blank" 
-        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-white border border-gray-200 hover:border-brand-dark text-gray-700 hover:text-brand-dark text-xs font-bold rounded-xl shadow-sm transition"
-      >
-        <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-        </svg>
-        <span>Buka PDF di Tab Baru</span>
-      </a>
+      <!-- Action: Open & Download full PDF -->
+      <div v-if="pdfUrl" class="w-full sm:w-auto flex items-center gap-2">
+        <a 
+          :href="pdfUrl" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-white border border-gray-200 hover:border-brand-dark text-gray-700 hover:text-brand-dark text-xs font-bold rounded-xl shadow-sm transition"
+        >
+          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+          </svg>
+          <span>Buka di Tab Baru</span>
+        </a>
+        <a 
+          :href="downloadUrl" 
+          download 
+          target="_blank"
+          class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 bg-brand-dark text-white hover:bg-brand-light text-xs font-bold rounded-xl shadow-sm transition"
+          title="Download file PDF"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span class="hidden sm:inline">Download</span>
+        </a>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -122,11 +134,16 @@
             </svg>
             <h3 class="text-sm font-bold text-gray-900">Preview File Dokumen EWTR</h3>
           </div>
-          <span class="text-xs text-gray-400">PDF Viewer Terintegrasi</span>
+          <div class="flex items-center gap-3">
+            <a v-if="pdfUrl" :href="pdfUrl" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-dark hover:underline font-bold hidden sm:inline-flex items-center gap-1">
+              Buka Layar Penuh &rarr;
+            </a>
+            <span class="text-xs text-gray-400">PDF Viewer Terintegrasi</span>
+          </div>
         </div>
         
         <!-- Embedded Preview Container -->
-        <div class="p-2 sm:p-4 bg-gray-100 flex justify-center">
+        <div class="p-2 sm:p-4 bg-gray-100 flex flex-col items-center">
           <div class="w-full max-w-5xl bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
             <iframe 
               v-if="pdfUrl" 
@@ -139,6 +156,14 @@
                 <a :href="pdfUrl" target="_blank" class="text-blue-600 underline font-bold ml-1">Klik di sini untuk mengunduh file PDF</a>.
               </div>
             </iframe>
+            <div v-else class="p-12 text-center text-gray-400 text-sm">
+              File PDF tidak ditemukan atau belum diunggah.
+            </div>
+          </div>
+          <div v-if="pdfUrl" class="mt-2 text-xs text-gray-500 text-center">
+            Jika preview PDF tidak muncul otomatis di browser, silakan 
+            <a :href="pdfUrl" target="_blank" rel="noopener noreferrer" class="text-brand-dark underline font-bold">klik di sini untuk membuka PDF</a> atau 
+            <a :href="downloadUrl" download target="_blank" class="text-brand-dark underline font-bold">unduh langsung</a>.
           </div>
         </div>
       </div>
@@ -266,10 +291,17 @@ const fetchEwtrDetail = async () => {
 
 const pdfUrl = computed(() => {
   if (!ewtr.value) return null
-  if (ewtr.value.pdf_url) return ewtr.value.pdf_url
-  if (!ewtr.value.pdf_path) return null
   const backendBase = config.public.apiBase.replace(/\/api\/?$/, '')
-  return `${backendBase}/storage/${ewtr.value.pdf_path}`
+  if (ewtr.value.pdf_path) {
+    const cleanPath = ewtr.value.pdf_path.replace(/^\/?storage\/?/, '')
+    return `${backendBase}/storage/${cleanPath}`
+  }
+  return ewtr.value.pdf_url || null
+})
+
+const downloadUrl = computed(() => {
+  if (!pdfUrl.value) return '#'
+  return pdfUrl.value.includes('?') ? `${pdfUrl.value}&download=1` : `${pdfUrl.value}?download=1`
 })
 
 const totalCount = computed(() => {

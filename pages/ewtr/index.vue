@@ -681,10 +681,13 @@ const formatDate = (dateStr) => {
 }
 
 const getPdfUrl = (item) => {
-  if (item.pdf_url) return item.pdf_url
-  if (!item.pdf_path) return '#'
+  if (!item) return '#'
   const backendBase = config.public.apiBase.replace(/\/api\/?$/, '')
-  return `${backendBase}/storage/${item.pdf_path}`
+  if (item.pdf_path) {
+    const cleanPath = item.pdf_path.replace(/^\/?storage\/?/, '')
+    return `${backendBase}/storage/${cleanPath}`
+  }
+  return item.pdf_url || '#'
 }
 
 // Modal Handlers
