@@ -327,6 +327,7 @@ const submitForm = async () => {
     closeModal()
     fetchItems()
   } catch (error) {
+    closeModal()
     const msg = error.response?._data?.message || error.data?.message || 'Gagal menyimpan kategori.'
     swal.fire('Error', msg, 'error')
   } finally {

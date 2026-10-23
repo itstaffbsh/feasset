@@ -382,6 +382,7 @@ const submitUpload = async () => {
     
   } catch (error) {
     console.error(error)
+    closeModal()
     swal.fire('Error', error?.data?.message || 'Gagal mengupload file scan.', 'error')
   } finally {
     uploading.value = false

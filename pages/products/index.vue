@@ -876,6 +876,7 @@ const submitImport = async () => {
     fetchProducts()
   } catch(e) {
     console.error('Gagal import:', e)
+    showImportModal.value = false
     swal.fire({
       title: 'Import Gagal',
       text: e?.data?.message || 'Terjadi kesalahan saat memproses file import.',
@@ -939,6 +940,7 @@ const confirmHolderMatchingImport = async () => {
     fetchProducts()
   } catch(e) {
     console.error('Gagal import dengan verifikasi peminjam:', e)
+    showHolderMatchingModal.value = false
     swal.fire({
       title: 'Import Gagal',
       text: e?.data?.message || 'Terjadi kesalahan saat memproses data peminjam.',

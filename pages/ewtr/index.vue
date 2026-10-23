@@ -827,6 +827,7 @@ const submitForm = async () => {
     closeModal()
     fetchEwtrs()
   } catch (error) {
+    closeModal()
     const msg = error.response?._data?.message || error.data?.message || 'Gagal menyimpan dokumen EWTR.'
     swal.fire('Error', msg, 'error')
   } finally {

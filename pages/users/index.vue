@@ -651,6 +651,7 @@ const submitImport = async () => {
 
     if (res?.status === 'duplicate_found') {
       isImporting.value = false
+      showImportModal.value = false
 
       let duplicateListHtml = res.duplicates.map(d => `
         <div class="py-1.5 border-b border-gray-100 last:border-0 flex items-center justify-between text-xs text-left">
@@ -732,6 +733,7 @@ const submitImport = async () => {
     fetchItems()
   } catch(e) {
     console.error('Gagal import:', e)
+    showImportModal.value = false
     swal.fire({
       title: 'Import Gagal',
       text: e?.data?.message || 'Terjadi kesalahan saat memproses file import.',
@@ -766,6 +768,7 @@ const executeImportWithAction = async (action) => {
     })
     fetchItems()
   } catch(e) {
+    showImportModal.value = false
     swal.fire({
       title: 'Import Gagal',
       text: e?.data?.message || 'Terjadi kesalahan saat memproses import.',

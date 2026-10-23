@@ -824,6 +824,7 @@ const saveRole = async () => {
     initAuth(true)
   } catch (err) {
     console.error('Gagal menyimpan role:', err)
+    closeModal()
     if (swal) {
       swal.fire('Error', err.data?.message || 'Gagal menyimpan data role.', 'error')
     }
